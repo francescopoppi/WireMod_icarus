@@ -11,7 +11,7 @@
 void ntupleAnalyzerOffbeam() {
 
     std::map<int,float> lifetimeEE, lifetimeEW, lifetimeWE, lifetimeWW;
-    loadLifetimeFile("../lifetime_run2_tpc.csv", lifetimeEE, lifetimeEW, lifetimeWE, lifetimeWW);
+    loadLifetimeFile("lifetime_run2_tpc.csv", lifetimeEE, lifetimeEW, lifetimeWE, lifetimeWW);
 
     Corrections corrections(lifetimeEE, lifetimeEW, lifetimeWE, lifetimeWW);
 
