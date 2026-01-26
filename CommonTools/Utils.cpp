@@ -3,20 +3,36 @@
 #include <iostream>
 
 std::vector<std::string> getFileListFromRunList(const std::string& filename) {
-    std::vector<std::string> files;
+    std::vector<std::string> allFiles;
+
     std::ifstream infile(filename);
     if (!infile.is_open()) {
         std::cerr << "Cannot open run list file: " << filename << std::endl;
-        return files;
+        return allFiles;
     }
 
-    std::string line;
-    while (std::getline(infile, line)) {
-        if (!line.empty()) files.push_back(line);
+    std::string listFile;
+    while (std::getline(infile, listFile)) {
+        if (listFile.empty()) continue;
+
+        // Apri il .list indicato
+        std::ifstream list(listFile);
+        if (!list.is_open()) {
+            std::cerr << "Cannot open file list: " << listFile << std::endl;
+            continue;
+        }
+
+        std::string rootFile;
+        while (std::getline(list, rootFile)) {
+            if (rootFile.empty()) continue;
+            allFiles.push_back(rootFile);
+        }
+
+        list.close();
     }
 
     infile.close();
-    return files;
+    return allFiles;
 }
 
 
