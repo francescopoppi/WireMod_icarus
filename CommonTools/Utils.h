@@ -1,6 +1,11 @@
 #pragma once
-#include <vector>
+
+#include <map>
 #include <string>
+#include <sstream> 
+#include <fstream> 
+#include <iostream>
+#include <vector>
 
 std::vector<std::string> getFileListFromRunList(const std::string& filename);
 

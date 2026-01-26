@@ -96,3 +96,8 @@ void ntupleAnalyzerOffbeam() {
 
     std::cout << "Histo Filled and Root tree created." << std::endl;
 }
+
+int main() {
+    ntupleAnalyzerOffbeam();
+    return 0;
+}
