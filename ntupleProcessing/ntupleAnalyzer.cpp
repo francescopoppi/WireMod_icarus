@@ -23,11 +23,14 @@ int main(int argc, char** argv)
     std::string fileListPath  = argv[3];
 
     bool isOverlay = false;
+    std::string suffix;
     if (sampleType == "Offbeam") {
         isOverlay = false;
+        suffix = "_offbeam";
     }
     else if (sampleType == "Overlay") {
         isOverlay = true;
+        suffix = "_overlay";
     }
     else {
         std::cout << "Unknown sample type: " << sampleType << "\n";
@@ -61,7 +64,7 @@ int main(int argc, char** argv)
         HitVars vars[4][3];
 
         for (int tpc=0;tpc<4;++tpc) {
-            fout[tpc] = new TFile(Form("hits_TPC%d.root",tpc),"RECREATE");
+            fout[tpc] = new TFile(Form("hits_TPC%d%s.root",tpc, suffix.c_str()),"RECREATE");
             for (int plane=0;plane<3;++plane) {
                 tree[tpc][plane] = new TTree(Form("Plane%d",plane),
                                              Form("TPC%d Plane%d hits",tpc,plane));
@@ -157,7 +160,7 @@ int main(int argc, char** argv)
             for (const auto& trk : East) processTrack(trk);
         }
 
-        TFile fout("binnedHistograms.root","RECREATE");
+        TFile fout(Form("binnedHistograms%s.root", suffix.c_str()),"RECREATE");
         hm.write(fout);
         fout.Close();
     };
