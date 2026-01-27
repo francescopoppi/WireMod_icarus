@@ -9,23 +9,9 @@
 #include <cmath>
 #include <iostream>
 
-TrackReader::TrackReader(std::map<int,float>& EE,
-                         std::map<int,float>& EW,
-                         std::map<int,float>& WE,
-                         std::map<int,float>& WW)
-    : lifetimeEE(EE), lifetimeEW(EW), lifetimeWE(WE), lifetimeWW(WW)
+TrackReader::TrackReader(Corrections& corr)
+    : corrections(corr)
 {}
-
-float TrackReader::getLifetime(int run, int cryo, int tpc)
-{
-    if (cryo == 0 && (tpc == 0 || tpc == 1)) return lifetimeEE[run];
-    if (cryo == 0 && (tpc == 2 || tpc == 3)) return lifetimeEW[run];
-    if (cryo == 1 && (tpc == 0 || tpc == 1)) return lifetimeWE[run];
-    if (cryo == 1 && (tpc == 2 || tpc == 3)) return lifetimeWW[run];
-
-    return 1e9; 
-}
-
 
 std::vector<Track> TrackReader::readFile(TFile* file, int cryo, bool applyTruthCuts)
 {
@@ -118,11 +104,6 @@ std::vector<Track> TrackReader::readFile(TFile* file, int cryo, bool applyTruthC
 
     while (reader.Next()) {
 
-        if (lifetimeEE.find(*runTPC) == lifetimeEE.end()) {
-            std::cout << "Run " << *runTPC << " not in lifetime map\n";
-            continue;
-        }
-
         double t0 = *t0PFP;
         if (std::isnan(t0)) t0 = *t0CRTHit;
         if (std::isnan(t0)) continue;
@@ -175,17 +156,12 @@ std::vector<Track> TrackReader::readFile(TFile* file, int cryo, bool applyTruthC
                 else if (cryo==0 && (rawTPC==2||rawTPC==3)) hit.tpc=1;
                 else if (cryo==1 && (rawTPC==0||rawTPC==1)) hit.tpc=2;
                 else if (cryo==1 && (rawTPC==2||rawTPC==3)) hit.tpc=3;
-
-                float lifetime = getLifetime(trk.run, cryo, rawTPC);
-
-                double driftT = (hit.tic * 0.4 - 340) - t0 / 1.e3;
-                double corr = std::exp(driftT / lifetime);
-
+                
                 hit.integral   = h_integral[plane][i];
-                hit.integral_c = h_integral[plane][i] * corr;
                 hit.dqdx       = h_dqdx[plane][i];
-                hit.dqdx_c     = h_dqdx[plane][i] * corr;
-
+                hit.integral_c = corrections.correctCharge(hit.integral, hit.tic, t0, trk.run, cryo, rawTPC);
+                hit.dqdx_c     = corrections.correctCharge(hit.dqdx, hit.tic, t0, trk.run, cryo, rawTPC);
+                
                 trk.hits[plane].push_back(hit);
             }
         }

@@ -6,6 +6,7 @@
 #include "../CommonTools/TrackReader.h"
 #include "../CommonTools/Corrections.h"
 #include "../CommonTools/Utils.h"
+#include "../CommonTools/TrackCuts.h"
 #include "../CommonTools/binning.h"
 
 void ntupleAnalyzerOffbeam() {
@@ -52,7 +53,9 @@ void ntupleAnalyzerOffbeam() {
             continue;
         }
 
-        TrackReader reader(lifetimeEE, lifetimeEW, lifetimeWE, lifetimeWW);
+        Corrections corrections(lifetimeEE, lifetimeEW, lifetimeWE, lifetimeWW);
+        TrackReader reader(corrections);
+
         auto WestTracks = reader.readFile(myFile, 1, false);
         auto EastTracks = reader.readFile(myFile, 0, false);
 
@@ -73,15 +76,21 @@ void ntupleAnalyzerOffbeam() {
         };
 
         for (const auto& trk : WestTracks) {
+            if (!Cuts::trackLength(trk)) continue;
             for (int plane=0; plane<3; ++plane) {
                 for (const auto& hit : trk.hits[plane]) {
+                    if (!Cuts::multiplicity1(hit)) continue;
+                    if (Cuts::danglingCable(hit)) continue;
                     fillHit(hit.tpc, plane, hit);
                 }
             }
         }
         for (const auto& trk : EastTracks) {
+            if (!Cuts::trackLength(trk)) continue;
             for (int plane=0; plane<3; ++plane) {
                 for (const auto& hit : trk.hits[plane]) {
+                    if (!Cuts::multiplicity1(hit)) continue;
+                    if (Cuts::danglingCable(hit)) continue;
                     fillHit(hit.tpc, plane, hit);
                 }
             }
