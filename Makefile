@@ -8,7 +8,9 @@ CXXFLAGS      := -O2 -Wall -fPIC -std=c++17
 SRC           := ntupleProcessing/ntupleAnalyzerOffbeam_main.cpp \
                  CommonTools/TrackReader.cpp \
                  CommonTools/Corrections.cpp \
-                 CommonTools/Utils.cpp
+                 CommonTools/Utils.cpp \
+                 CommonTools/HistogramManager.cpp \
+                 CommonTools/binning.cpp
 
 TARGET        := ntupleAnalyzerOffbeam
 
