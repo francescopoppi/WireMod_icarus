@@ -12,6 +12,18 @@ The requirements to run these utilities are simple:
 
 These utilities run both in SL7 and AL9, no need to setup icaruscode/sbncode/sbndcode.
 
+**If you just want to obtain the ratios and you want to skip the tedious process of producing the binned and unbinned dataset, you can use those that I have already processed. They can be found on FNAL persistent storage here:
+_/pnfs/icarus/persistent/users/fpoppi/WireMod/BinnedFiles/_
+You will find two files:
+_OffbeamRun2_XTheta_ltc_fv.root_  _OverlayRun2_XTheta_ltc_fv.root_
+These two files contain the TH3D of offbeam and overlay, they have both lifetime corrected and uncorrected integrals.
+Some notation I used: ltc means that they included the lifetime corrections, fv means that they included the fiducialization around the dangling cable.
+These two files can be fed to **produceTGraphFromTH3** skipping **ntupleAnalyzer**.
+
+For what concern the unbinned datasets they can be found here:
+_/pnfs/icarus/persistent/users/fpoppi/WireMod/UnBinnedFiles/_
+
+
 This repo is not frozen! Expect changes and updates.
 
 ## Make
