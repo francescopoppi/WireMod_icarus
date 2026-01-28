@@ -121,63 +121,8 @@ TH3D* rebinTH3_Custom(TH3D* h3_orig, const char* mode, int tpc) {
     if (!h3_orig) return nullptr;
 
     std::vector<double> xedges, yedges, zedges;
-
-    int nXorig = h3_orig->GetNbinsX();
-    int nYorig = h3_orig->GetNbinsY();
-    int nZorig = h3_orig->GetNbinsZ();
-
-    TString smode(mode);
-
-    std::vector<double> allEdgesX, allEdgesY, allEdgesZ;
-    for (int i = 1; i <= nXorig + 1; ++i)
-        allEdgesX.push_back(h3_orig->GetXaxis()->GetBinLowEdge(i));
-    for (int i = 1; i <= nYorig + 1; ++i)
-        allEdgesY.push_back(h3_orig->GetYaxis()->GetBinLowEdge(i));
-    for (int i = 1; i <= nZorig + 1; ++i)
-        allEdgesZ.push_back(h3_orig->GetZaxis()->GetBinLowEdge(i));
-
-    double xMin, xMax;
-    if (tpc == 0 || tpc == 3) { xMin = 208.5; xMax = 361.5; }
-    else if (tpc == 1 || tpc == 2) { xMin = 58.5; xMax = 211.5; }
-    else { std::cerr << "Unknown TPC " << tpc << "!" << std::endl; return nullptr; }
-
-    // Here I am merging toghether first 2 bins and last 2 bins
-    auto selectXEdges = [&](std::vector<double>& out){
-        int iStart = -1, iEnd = -1;
-        for (size_t i = 0; i < allEdgesX.size(); ++i) {
-            if (allEdgesX[i] >= xMin && iStart < 0) iStart = i;
-            if (allEdgesX[i] <= xMax) iEnd = i;
-        }
-        double firstEdge  = allEdgesX[iStart];
-        double secondEdge = allEdgesX[iStart+2];
-        out.push_back(firstEdge);
-        out.push_back(secondEdge);
-
-        for (int i = iStart + 3; i <= iEnd - 2; ++i)
-            out.push_back(allEdgesX[i]);
-
-        double lastMergedEdge = allEdgesX[iEnd];
-        out.push_back(lastMergedEdge);
-    };
-
-    // =================== ThetaXW custom edges ===================
-    //double thetaEdges[] = {0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 54, 60, 68, 76, 90};
-    double thetaEdges[] = {0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 54, 65, 90};
-    
-    int nTheta = sizeof(thetaEdges)/sizeof(double);
-
-    // =============== MODE: XTheta ================================
-    if (smode == "XTheta" || smode == "XTheta_c") {
-
-        selectXEdges(xedges);
-
-        for (int i = 0; i < nTheta; ++i)
-            yedges.push_back(thetaEdges[i]);
-
-        for (auto e : allEdgesZ)
-            zedges.push_back(e);
-
-    }
+    if (TString(mode)=="XTheta" || TString(mode)=="XTheta_c")
+        getAnalysisEdges_XTheta(tpc, xedges, yedges, zedges, h3_orig);
     else {
         std::cerr << "Unsupported mode: " << mode << std::endl;
         return nullptr;
@@ -189,28 +134,30 @@ TH3D* rebinTH3_Custom(TH3D* h3_orig, const char* mode, int tpc) {
                             yedges.size()-1, yedges.data(),
                             zedges.size()-1, zedges.data());
 
-    for (int ix = 1; ix <= nXorig; ++ix) {
-        for (int iy = 1; iy <= nYorig; ++iy) {
-            for (int iz = 1; iz <= nZorig; ++iz) {
-                double content = h3_orig->GetBinContent(ix, iy, iz);
-                double error   = h3_orig->GetBinError(ix, iy, iz);
-                if (content == 0 && error == 0) continue;
+    // copia contenuti
+    int nXorig = h3_orig->GetNbinsX();
+    int nYorig = h3_orig->GetNbinsY();
+    int nZorig = h3_orig->GetNbinsZ();
 
-                double x = h3_orig->GetXaxis()->GetBinCenter(ix);
-                double y = h3_orig->GetYaxis()->GetBinCenter(iy);
-                double z = h3_orig->GetZaxis()->GetBinCenter(iz);
+    for (int ix=1; ix<=nXorig; ix++)
+        for (int iy=1; iy<=nYorig; iy++)
+            for (int iz=1; iz<=nZorig; iz++) {
+                double content = h3_orig->GetBinContent(ix,iy,iz);
+                double error   = h3_orig->GetBinError(ix,iy,iz);
+                if (content==0 && error==0) continue;
 
-                int newbin = h3_new->FindBin(x, y, z);
+                int newbin = h3_new->FindBin(h3_orig->GetXaxis()->GetBinCenter(ix),
+                                             h3_orig->GetYaxis()->GetBinCenter(iy),
+                                             h3_orig->GetZaxis()->GetBinCenter(iz));
                 double oldcontent = h3_new->GetBinContent(newbin);
                 double olderror   = h3_new->GetBinError(newbin);
                 h3_new->SetBinContent(newbin, oldcontent + content);
                 h3_new->SetBinError(newbin, std::sqrt(olderror*olderror + error*error));
             }
-        }
-    }
 
     return h3_new;
 }
+
 
 // ---------------------------
 

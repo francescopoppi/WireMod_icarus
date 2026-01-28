@@ -1,6 +1,9 @@
 #ifndef BINNING_H
 #define BINNING_H
 
+#include <vector>
+#include <TH3.h> 
+
 const int nBinsWidth      = 500;  
 const int nBinsGoodness   = 400;  
 const int nBinsDQDX       = 100;  
@@ -12,6 +15,7 @@ const int nBinsY = 31;
 const int nBinsZ = 180;
 const int nThetaBinsXW = 45; 
 
+extern double binsX[4][nBinsX+1]; // tpc 0-1-2-3 = EE-EW-WE-WW
 extern double thetaBinsXW[nThetaBinsXW+1];
 extern double binsWidth[nBinsWidth+1];
 extern double binsGoodness[nBinsGoodness+1];
@@ -23,5 +27,9 @@ extern double binsY[nBinsY+1];
 extern double binsZ[nBinsZ+1];
 
 void initBins();
+
+void getAnalysisEdges_XTheta(int tpc, std::vector<double>& xedges,
+                           std::vector<double>& thetaEdges, std::vector<double>& zedges,
+                           const TH3D* h3_orig);
 
 #endif

@@ -4,6 +4,7 @@
 #include <TH1.h>
 #include <TH3.h>
 #include <TF1.h>
+#include "binning.h"
 
 void hist_mean_std_error(const TH1* h, Double_t* result);
 

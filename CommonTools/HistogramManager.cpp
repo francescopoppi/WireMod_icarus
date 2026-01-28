@@ -14,14 +14,7 @@ void HistogramManager::bookHistograms()
 {
     const char* vars[nVar] = {"width","goodness","hit_integral","hit_pitch"};
 
-    double xMin[4] = {200, 50, 50, 200};
-    double xMax[4] = {370, 220, 220, 370};
-
     for (int tpc=0; tpc<nTPC; tpc++) {
-
-        double xBins[nBinsX+1];
-        for (int i=0;i<=nBinsX;i++)
-            xBins[i] = xMin[tpc] + i*(xMax[tpc]-xMin[tpc])/nBinsX;
 
         for (int plane=0; plane<nPlane; plane++) {
             for (int v=0; v<nVar; v++) {
@@ -38,13 +31,13 @@ void HistogramManager::bookHistograms()
                 TString title1 = Form("%s (TPC%d plane%d);x;thetaXW;%s", vars[v], tpc, plane, vars[v]);
 
                 h3D_XTheta[tpc][plane][v] = new TH3D(name1,title1,
-                                                    nBinsX,xBins,
+                                                    nBinsX,binsX[tpc],
                                                     nThetaBinsXW,thetaBinsXW,
                                                     nBinsVar,binsVar);
 
                 TString name2  = Form("h3D_%s_TPC%d_plane%d_XTheta_c", vars[v], tpc, plane);
                 h3D_XTheta_c[tpc][plane][v] = new TH3D(name2,title1,
-                                                      nBinsX,xBins,
+                                                      nBinsX,binsX[tpc],
                                                       nThetaBinsXW,thetaBinsXW,
                                                       nBinsVar,binsVar);
 

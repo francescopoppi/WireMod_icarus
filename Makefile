@@ -13,7 +13,8 @@ SRC_ANALYZER  := ntupleProcessing/ntupleAnalyzer.cpp \
                  CommonTools/binning.cpp
 
 SRC_TH3       := BinnedRatioMaker/processTH3.cpp \
-                 CommonTools/AnalysisTools.cpp
+                 CommonTools/AnalysisTools.cpp \
+                 CommonTools/binning.cpp
 
 TARGET_ANALYZER := ntupleAnalyzer
 TARGET_TH3      := produceTGraphFromTH3
