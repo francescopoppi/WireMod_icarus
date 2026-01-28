@@ -65,6 +65,6 @@ The fourth argument is the output name.
 TBD:
 Add common analysis notebook and python scripts for final ratio plots.  --> Very Soon
 Add binned analysis python script. --> Very Soon
-Add other modalities, --> Not so Soon
+Add other modalities. --> Not so Soon
 
 For questions ask Francesco Poppi on Slack or by mail (poppi@bo.infn.it)
