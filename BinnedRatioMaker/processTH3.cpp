@@ -53,7 +53,25 @@ void makeAll_ITM_TGraphs(
     }
 
     // --- Loop TPC / Plane / Variable
+
+    TH2D* hEdges[4] = {nullptr,nullptr,nullptr,nullptr};
+
     for (int tpc = 0; tpc < 4; ++tpc) {
+        
+        std::vector<double> t_xedges, t_thetaEdges, t_zedges;
+        TString t_histname = Form("h3D_%s_TPC%d_plane%d_%s", vars[0], tpc, 0, mode);
+        TH3D* h3_tmp = (TH3D*)fin->Get(t_histname);
+        getAnalysisEdges_XTheta(tpc, t_xedges, t_thetaEdges, t_zedges, h3_tmp);
+
+        hEdges[tpc] = new TH2D(
+            Form("hEdges_XTheta_TPC%d", tpc),
+            "Edges template",
+            t_xedges.size()-1, t_xedges.data(),
+            t_thetaEdges.size()-1, t_thetaEdges.data()
+        );
+        fout->cd();
+        hEdges[tpc]->Write();
+        
         for (int plane = 0; plane < 3; ++plane) {
             for (int v = 0; v < 4; ++v) {
 
@@ -87,7 +105,7 @@ void makeAll_ITM_TGraphs(
                 // --- Occupancy histogram
                 int nbx = h3->GetNbinsX();
                 int nby = h3->GetNbinsY();
-                
+
                 const TAxis* xax = h3->GetXaxis();
                 const TAxis* yax = h3->GetYaxis();
 

@@ -16,10 +16,14 @@ SRC_TH3       := BinnedRatioMaker/processTH3.cpp \
                  CommonTools/AnalysisTools.cpp \
                  CommonTools/binning.cpp
 
+SRC_RATIO     := BinnedRatioMaker/processTGraphRatio.cpp \
+                 CommonTools/binning.cpp
+
 TARGET_ANALYZER := ntupleAnalyzer
 TARGET_TH3      := produceTGraphFromTH3
+TARGET_RATIO    := produceRatio
 
-all: $(TARGET_ANALYZER) $(TARGET_TH3)
+all: $(TARGET_ANALYZER) $(TARGET_TH3) $(TARGET_RATIO)
 
 $(TARGET_ANALYZER): $(SRC_ANALYZER)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_ANALYZER) -o $(TARGET_ANALYZER) $(ROOTLIBS)
@@ -27,5 +31,8 @@ $(TARGET_ANALYZER): $(SRC_ANALYZER)
 $(TARGET_TH3): $(SRC_TH3)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_TH3) -o $(TARGET_TH3) $(ROOTLIBS)
 
+$(TARGET_RATIO): $(SRC_RATIO)
+	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_RATIO) -o $(TARGET_RATIO) $(ROOTLIBS)
+
 clean:
-	rm -f $(TARGET_ANALYZER) $(TARGET_TH3) *.o
+	rm -f $(TARGET_ANALYZER) $(TARGET_TH3) $(TARGET_RATIO) *.o
