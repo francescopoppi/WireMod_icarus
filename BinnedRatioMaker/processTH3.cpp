@@ -45,10 +45,12 @@ void makeAll_ITM_TGraphs(
     TDirectory* baseDir = fout->GetDirectory(subdirName);
     if (!baseDir) baseDir = fout->mkdir(subdirName);
 
-    TDirectory* occDir = baseDir->GetDirectory("OccupancyMaps");
-    if (!occDir) occDir = baseDir->mkdir("OccupancyMaps");
-
-    gSystem->Exec(Form("mkdir -p %s/%s", plotOccDir, subdirName));
+    TDirectory* occDir = nullptr;
+    if (savePlots) {
+        occDir = baseDir->GetDirectory("OccupancyMaps");
+        if (!occDir) occDir = baseDir->mkdir("OccupancyMaps");
+        gSystem->Exec(Form("mkdir -p %s/%s", plotOccDir, subdirName));
+    }
 
     // --- Loop TPC / Plane / Variable
     for (int tpc = 0; tpc < 4; ++tpc) {
@@ -85,12 +87,21 @@ void makeAll_ITM_TGraphs(
                 // --- Occupancy histogram
                 int nbx = h3->GetNbinsX();
                 int nby = h3->GetNbinsY();
+                
+                const TAxis* xax = h3->GetXaxis();
+                const TAxis* yax = h3->GetYaxis();
+
+                std::vector<double> xedges(nbx+1), yedges(nby+1);
+                for (int i = 1; i <= nbx+1; ++i) xedges[i-1] = xax->GetBinLowEdge(i);
+                for (int i = 1; i <= nby+1; ++i) yedges[i-1] = yax->GetBinLowEdge(i);
+
                 TH2D* h2_entries = new TH2D(
                     Form("h2D_entries_%s_TPC%d_plane%d_%s", vars[v], tpc, plane, mode),
                     Form("Entries map %s (%s);%s;%s;Entries", vars[v], mode, xtitle.Data(), ytitle.Data()),
-                    nbx, h3->GetXaxis()->GetXmin(), h3->GetXaxis()->GetXmax(),
-                    nby, h3->GetYaxis()->GetXmin(), h3->GetYaxis()->GetXmax()
+                    nbx, xedges.data(),
+                    nby, yedges.data()
                 );
+
 
                 int point = 0;
 
@@ -128,9 +139,11 @@ void makeAll_ITM_TGraphs(
 
                 // --- Write outputs
                 baseDir->cd(); gr->Write(); gr_err->Write();
-                occDir->cd(); h2_entries->Write();
 
                 if (savePlots) {
+                    occDir->cd();
+                    h2_entries->Write();
+                
                     TCanvas cocc("cocc","",800,600);
                     cocc.SetRightMargin(0.15); cocc.SetLeftMargin(0.12); cocc.SetBottomMargin(0.12);
                     cocc.SetLogz();
