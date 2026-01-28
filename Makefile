@@ -3,20 +3,28 @@ ROOTLIBS      := $(shell root-config --libs)
 ROOTGLIBS     := $(shell root-config --glibs)
 
 CXX           := g++
-CXXFLAGS      := -O2 -Wall -fPIC -std=c++17
+CXXFLAGS      := -O2 -Wall -fPIC -std=c++17 -I./CommonTools
 
-SRC           := ntupleProcessing/ntupleAnalyzer.cpp \
+SRC_ANALYZER  := ntupleProcessing/ntupleAnalyzer.cpp \
                  CommonTools/TrackReader.cpp \
                  CommonTools/Corrections.cpp \
                  CommonTools/Utils.cpp \
                  CommonTools/HistogramManager.cpp \
                  CommonTools/binning.cpp
 
-TARGET        := ntupleAnalyzer
-all: $(TARGET)
+SRC_TH3       := BinnedRatioMaker/processTH3.cpp \
+                 CommonTools/AnalysisTools.cpp
 
-$(TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC) -o $(TARGET) $(ROOTLIBS)
+TARGET_ANALYZER := ntupleAnalyzer
+TARGET_TH3      := produceTGraphFromTH3
+
+all: $(TARGET_ANALYZER) $(TARGET_TH3)
+
+$(TARGET_ANALYZER): $(SRC_ANALYZER)
+	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_ANALYZER) -o $(TARGET_ANALYZER) $(ROOTLIBS)
+
+$(TARGET_TH3): $(SRC_TH3)
+	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_TH3) -o $(TARGET_TH3) $(ROOTLIBS)
 
 clean:
-	rm -f $(TARGET) *.o
+	rm -f $(TARGET_ANALYZER) $(TARGET_TH3) *.o
