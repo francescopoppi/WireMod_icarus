@@ -184,28 +184,28 @@ void makeAll_ITM_TGraphs(
 
 int main(int argc, char** argv) {
 
-    if (argc != 5) {
+    if (argc != 6) {
         std::cout << "\nUsage:\n"
-                  << "./produceTGraphFromTH3  [Offbeam|Overlay]  input.root  mode  [true|false]\n\n";
+                  << "./produceTGraphFromTH3  [Offbeam|Overlay]  input.root  mode  output.root  [true|false]\n\n";
         return 1;
     }
 
     std::string sampleType = argv[1];
     std::string infile     = argv[2];
     std::string mode       = argv[3];
-    std::string saveStr    = argv[4];
+    std::string outfile    = argv[4];
+    std::string saveStr    = argv[5];
 
     bool savePlots = (saveStr == "true" || saveStr == "1");
 
     std::string subdirName = (sampleType == "Offbeam") ? "Data" : "MC";
-
-    std::string outfile = "ITM_" + sampleType + "_" + mode + ".root";
-    std::string plotDir = "occupancy_" + sampleType + "_" + mode;
+    std::string plotDir    = "occupancy_" + sampleType + "_" + mode;
 
     std::cout << "=== Running ITM Analysis ===\n";
     std::cout << "Sample: " << sampleType << "\n";
     std::cout << "Input : " << infile << "\n";
     std::cout << "Mode  : " << mode << "\n";
+    std::cout << "Output: " << outfile << "\n";
     std::cout << "Save occupancy plots: " << (savePlots ? "YES" : "NO") << "\n\n";
 
     TFile* fout = new TFile(outfile.c_str(), "RECREATE");
@@ -219,7 +219,7 @@ int main(int argc, char** argv) {
         -2., 1.75,     // sig_down, sig_up
         1e-4,          // tol
         50,            // minEntries
-        savePlots      // save png/pdf
+        savePlots
     );
 
     fout->Close();
