@@ -32,4 +32,8 @@ void getAnalysisEdges_XTheta(int tpc, std::vector<double>& xedges,
                            std::vector<double>& thetaEdges, std::vector<double>& zedges,
                            const TH3D* h3_orig);
 
+void getAnalysisEdges_XThetaUnBinned(int tpc,
+                                    std::vector<double>& xedges,
+                                    std::vector<double>& thetaEdges);
+
 #endif

@@ -85,3 +85,30 @@ void getAnalysisEdges_XTheta(int tpc, std::vector<double>& xedges,
     for (int i=1;i<=nZ+1;i++)
         zedges.push_back(h3_orig->GetZaxis()->GetBinLowEdge(i));
 }
+
+void getAnalysisEdges_XThetaUnBinned(int tpc,
+                                    std::vector<double>& xedges,
+                                    std::vector<double>& thetaEdges)
+{
+    xedges.clear();
+    thetaEdges.clear();
+
+    std::vector<double> allXedges;
+    for (int i = 0; i <= nBinsX; ++i)
+        allXedges.push_back(binsX[tpc][i]);
+
+    int iStart = 0;
+    int iEnd   = allXedges.size();
+
+    // Remove first 2 and last 2 bins, merge first two and last two
+    xedges.push_back(allXedges[iStart+2]);
+    xedges.push_back(allXedges[iStart+4]);
+
+    for (int i = iStart+5; i <= iEnd-4; ++i)
+        xedges.push_back(allXedges[i]);
+
+    xedges.push_back(allXedges[iEnd-2]);
+
+    double thetaArr[] = {0,4,8,12,16,20,24,28,32,36,40,44,48,54,65,90};
+    thetaEdges.assign(thetaArr, thetaArr + sizeof(thetaArr)/sizeof(double));
+}
