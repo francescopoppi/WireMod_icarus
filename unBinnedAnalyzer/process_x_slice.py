@@ -15,7 +15,6 @@ parser.add_argument("--chunk-size", type=int, default=200)
 parser.add_argument("--plane", type=int, required=True, choices=[0,1,2])
 parser.add_argument("--x-min", type=float, default=-150, help="Min X")
 parser.add_argument("--x-max", type=float, default=150, help="Max X")
-parser.add_argument("--x-nbins", type=int, default=15, help="Number of X bins")
 args = parser.parse_args()
 
 # theta bin edges
@@ -94,8 +93,8 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
     theta_centers = 0.25 * (theta_edges[1:] - theta_edges[:-1])
     n_theta_bins = len(theta_edges) - 1
 
-    x_edges = np.linspace(x_min, x_max, x_nbins+1)
-    n_x_bins = len(x_edges) - 1
+    x_edges = np.array([x_min, x_max])
+    n_x_bins = 1
 
     # initialize bins
     bins = {}
