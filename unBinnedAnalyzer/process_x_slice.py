@@ -87,7 +87,6 @@ def compute_3x3_subbins(values, theta_vals, x_vals, theta_min, theta_max, x_min,
 
     return results
 
-# main processing function
 def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_index=0, x_min=-150, x_max=150, x_nbins=15):
     theta_edges = theta_edges_bin
     theta_centers = 0.25 * (theta_edges[1:] - theta_edges[:-1])
@@ -198,6 +197,5 @@ process_x_slice_slim(
     chunk_size_mb=args.chunk_size,
     plane_index=args.plane,
     x_min=args.x_min,
-    x_max=args.x_max,
-    x_nbins=args.x_nbins
+    x_max=args.x_max
 )
