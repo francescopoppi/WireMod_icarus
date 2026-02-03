@@ -13,6 +13,8 @@ const int nBinsPitch      = 100;
 const int nBinsX = 40;
 const int nBinsY = 31;
 const int nBinsZ = 180;
+const int nBinsY_2 = 15;
+const int nBinsZ_2 = 45;
 const int nThetaBinsXW = 45; 
 
 extern double binsX[4][nBinsX+1]; // tpc 0-1-2-3 = EE-EW-WE-WW
@@ -25,6 +27,9 @@ extern double binsIntegral[nBinsIntegral+1];
 extern double binsPitch[nBinsPitch+1];
 extern double binsY[nBinsY+1];
 extern double binsZ[nBinsZ+1];
+extern double binsY_2[nBinsY_2+1];
+extern double binsZ_2[nBinsZ_2+1];
+
 
 void initBins();
 

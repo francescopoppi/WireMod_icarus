@@ -13,11 +13,10 @@ parser.add_argument("--input", required=True, help="Slim ROOT file")
 parser.add_argument("--output", required=True, help="Output PKL")
 parser.add_argument("--chunk-size", type=int, default=200)
 parser.add_argument("--plane", type=int, required=True, choices=[0,1,2])
-parser.add_argument("--x-min", type=float, default=-150, help="Min X")
-parser.add_argument("--x-max", type=float, default=150, help="Max X")
+parser.add_argument("--z-min", type=float, default=-150, help="Min Z")
+parser.add_argument("--z-max", type=float, default=150, help="Max Z")
 args = parser.parse_args()
 
-theta_edges_bin = np.array([0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 54, 65, 90])
 
 def cut_integral(x):
     return 1.35696 * np.exp(0.0786976 * x) - 24.1874
@@ -84,27 +83,27 @@ def compute_3x3_subbins(values, theta_vals, x_vals, theta_min, theta_max, x_min,
 
     return results
 
-def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_index=0, x_min=-150, x_max=150, x_nbins=15):
-    theta_edges = theta_edges_bin
-    theta_centers = 0.25 * (theta_edges[1:] - theta_edges[:-1])
-    n_theta_bins = len(theta_edges) - 1
+def process_z_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_index=0,
+                         z_min=-150, z_max=150):
+    y_edges = np.linspace(-180, 120, 15+1)   # 31 bin Y
+    n_y_bins = len(y_edges) - 1
 
-    x_edges = np.array([x_min, x_max])
-    n_x_bins = 1
+    z_edges = np.array([z_min, z_max])       # slice Z già fissata
+    n_z_bins = len(z_edges) - 1
 
     bins = {}
-    for t_idx in range(n_theta_bins):
-        for x_idx in range(n_x_bins):
-            bins[(t_idx, x_idx)] = {
+    for y_idx in range(n_y_bins):
+        for z_idx in range(n_z_bins):
+            bins[(y_idx, z_idx)] = {
                 "integral": [],
                 "width": [],
-                "theta": [],
-                "x": []
+                "y": [],
+                "z": []
             }
 
     with uproot.open(slice_file) as f:
         tree = f["nominal"]
-        branches = ["dirX", "pitch", "integral", "width", "x"]
+        branches = ["dirX", "pitch", "integral", "width", "y", "z"]
 
         for chunk in tqdm(
             tree.iterate(branches, step_size=f"{chunk_size_mb} MB", library="np"),
@@ -112,84 +111,68 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
             unit="chunk"
         ):
             thetaX = np.degrees(np.arctan(chunk["dirX"] * chunk["pitch"] / 0.3))
-            x   = chunk["x"]
+
+            y        = chunk["y"]
+            z        = chunk["z"]
             integral = chunk["integral"]
             width    = chunk["width"]
 
             mask_integral = integral > cut_integral(thetaX)
-            mask_width = width > cut_width(thetaX, plane_index)
+            mask_width    = width > cut_width(thetaX, plane_index)
             mask = mask_integral & mask_width
 
-            thetaX = thetaX[mask]
-            x   = x[mask]
+            y        = y[mask]
+            z        = z[mask]
             integral = integral[mask]
-            width = width[mask]
+            width    = width[mask]
 
-            tb = np.digitize(thetaX, theta_edges) - 1
-            xb = np.digitize(x, x_edges) - 1
+            yb = np.digitize(y, y_edges) - 1
+            zb = np.digitize(z, z_edges) - 1
 
-            valid = (
-                (tb >= 0) & (tb < n_theta_bins) &
-                (xb >= 0) & (xb < n_x_bins)
-            )
+            valid = (yb >= 0) & (yb < n_y_bins) & (zb >= 0) & (zb < n_z_bins)
 
-            for t, x, i, w, th, xx in zip(tb[valid], xb[valid], integral[valid], width[valid], thetaX[valid], x[valid]):
-                b = bins[(t, x)]
+            for y_idx, z_idx, i, w, yy, zz in zip(yb[valid], zb[valid],
+                                                  integral[valid], width[valid],
+                                                  y[valid], z[valid]):
+                b = bins[(y_idx, z_idx)]
                 b["integral"].append(i)
                 b["width"].append(w)
-                b["theta"].append(th)
-                b["x"].append(xx)
+                b["y"].append(yy)
+                b["z"].append(zz)
 
     results = []
-    for (t_idx, x_idx), b in tqdm(bins.items(), desc="Computing ITM per (theta,X) bin"):
-        theta_min, theta_max = theta_edges[t_idx], theta_edges[t_idx+1]
-        x_min_bin, x_max_bin = x_edges[x_idx], x_edges[x_idx+1]
+    for (y_idx, z_idx), b in tqdm(bins.items(), desc="Computing ITM per (Y,Z) bin"):
+        y_min, y_max = y_edges[y_idx], y_edges[y_idx+1]
+        z_min_bin, z_max_bin = z_edges[z_idx], z_edges[z_idx+1]
 
         n_entries = len(b["integral"])
-
         mean_i, err_i = iterative_truncated_mean(b["integral"])
         mean_w, err_w = iterative_truncated_mean(b["width"])
 
-        sub_i = compute_3x3_subbins(
-            b["integral"], np.array(b["theta"]), np.array(b["x"]),
-            theta_min, theta_max, x_min_bin, x_max_bin
-        )
-
-        sub_w = compute_3x3_subbins(
-            b["width"], np.array(b["theta"]), np.array(b["x"]),
-            theta_min, theta_max, x_min_bin, x_max_bin
-        )
-
         row = {
-            "theta_bin": pd.Interval(theta_min, theta_max),
-            "x_bin": pd.Interval(x_min_bin, x_max_bin),
+            "y_bin": pd.Interval(y_min, y_max),
+            "z_bin": pd.Interval(z_min_bin, z_max_bin),
             "n_entries": n_entries,
             "mean_integral": mean_i,
             "err_integral": err_i,
             "mean_width": mean_w,
-            "err_width": err_w,
+            "err_width": err_w
         }
-
-        for k in range(1, 10):
-            row[f"sub{k}_mean_integral"] = sub_i[k][0]
-            row[f"sub{k}_err_integral"]  = sub_i[k][1]
-            row[f"sub{k}_mean_width"]    = sub_w[k][0]
-            row[f"sub{k}_err_width"]     = sub_w[k][1]
 
         results.append(row)
 
     df = pd.DataFrame(results)
     if save_to:
         df.to_pickle(save_to)
-        print(f"Saved X slice with theta/X bins to {save_to}")
+        print(f"Saved Z slice with Y/Z bins to {save_to}")
 
     return df
 
-process_x_slice_slim(
+process_z_slice_slim(
     slice_file=args.input,
     save_to=args.output,
     chunk_size_mb=args.chunk_size,
     plane_index=args.plane,
-    x_min=args.x_min,
-    x_max=args.x_max
+    z_min=args.z_min,
+    z_max=args.z_max
 )

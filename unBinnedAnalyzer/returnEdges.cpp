@@ -10,7 +10,7 @@
 int main(int argc, char* argv[]) {
     if (argc != 5) {
         std::cerr << "Usage: " << argv[0]
-                  << " <X|Z> <tpc> <bin_index> <min|max>\n";
+                  << " <X|Z|Z2> <tpc> <bin_index> <min|max>\n";
         return 1;
     }
 
@@ -59,8 +59,25 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    else if (mode == "Z2") {
+
+        if (bin_index < 0 || bin_index >= nBinsZ_2) {
+            std::cerr << "Error: Z bin_index out of range (0-" << nBinsZ_2-1 << ")\n";
+            return 1;
+        }
+
+        if (opt == "min")
+            std::cout << binsZ_2[bin_index] << "\n";
+        else if (opt == "max")
+            std::cout << binsZ_2[bin_index + 1] << "\n";
+        else {
+            std::cerr << "Error: option must be 'min' or 'max'\n";
+            return 1;
+        }
+    }
+
     else {
-        std::cerr << "Error: first argument must be 'X' or 'Z'\n";
+        std::cerr << "Error: first argument must be 'X' or 'Z' or 'Z2'\n";
         return 1;
     }
 

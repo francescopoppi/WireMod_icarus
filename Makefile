@@ -25,6 +25,9 @@ SRC_SLICE := unBinnedAnalyzer/split_slice.cpp \
 SRC_SLICEYZ := unBinnedAnalyzer/split_slice_z.cpp \
              CommonTools/binning.cpp
 
+SRC_SLICEYZ_4 := unBinnedAnalyzer/split_slice_z_rebin4.cpp \
+             CommonTools/binning.cpp
+
 
 SRC_BINEDGE := unBinnedAnalyzer/returnEdges.cpp \
              CommonTools/binning.cpp
@@ -35,10 +38,12 @@ TARGET_TH3      := produceTGraphFromTH3
 TARGET_RATIO    := produceRatio
 TARGET_SLICE    := produceSlice
 TARGET_SLICEYZ  := produceSliceYZ
+TARGET_SLICEYZ_4:= produceSliceYZ_rebin4
+
 
 TARGET_BINEDGE  := returnEdge
 
-all: $(TARGET_ANALYZER) $(TARGET_TH3) $(TARGET_RATIO) $(TARGET_SLICE) $(TARGET_SLICEYZ) $(TARGET_BINEDGE)
+all: $(TARGET_ANALYZER) $(TARGET_TH3) $(TARGET_RATIO) $(TARGET_SLICE) $(TARGET_SLICEYZ) $(TARGET_SLICEYZ_4) $(TARGET_BINEDGE)
 
 $(TARGET_ANALYZER): $(SRC_ANALYZER)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_ANALYZER) -o $(TARGET_ANALYZER) $(ROOTLIBS)
@@ -55,8 +60,12 @@ $(TARGET_SLICE): $(SRC_SLICE)
 $(TARGET_SLICEYZ): $(SRC_SLICEYZ)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_SLICEYZ) -o $(TARGET_SLICEYZ) $(ROOTLIBS)
 
+$(TARGET_SLICEYZ_4): $(SRC_SLICEYZ_4)
+	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_SLICEYZ_4) -o $(TARGET_SLICEYZ_4) $(ROOTLIBS)
+
+
 $(TARGET_BINEDGE): $(SRC_BINEDGE)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_BINEDGE) -o $(TARGET_BINEDGE) $(ROOTLIBS)
 
 clean:
-	rm -f $(TARGET_ANALYZER) $(TARGET_TH3) $(TARGET_RATIO) $(TARGET_SLICE) $(TARGET_SLICEYZ) $(TARGET_BINEDGE) *.o
+	rm -f $(TARGET_ANALYZER) $(TARGET_TH3) $(TARGET_RATIO) $(TARGET_SLICE) $(TARGET_SLICEYZ) $(TARGET_SLICEYZ_4) $(TARGET_BINEDGE) *.o

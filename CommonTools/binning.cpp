@@ -10,6 +10,9 @@ double binsPitch[nBinsPitch+1];
 double binsX[4][nBinsX+1]; 
 double binsY[nBinsY+1];
 double binsZ[nBinsZ+1];
+double binsY_2[nBinsY_2+1];
+double binsZ_2[nBinsZ_2+1];
+
 
 void initBins() {
     for (int i = 0; i <= nThetaBinsXW; i++)
@@ -36,8 +39,15 @@ void initBins() {
     for (int i = 0; i <= nBinsY; ++i)
         binsY[i] = -180 + i * (180+120) / nBinsY;
 
+    for (int i = 0; i <= nBinsY_2; ++i)
+        binsY[i] = -180 + i * (180+120) / nBinsY_2;
+
     for (int i = 0; i <= nBinsZ; ++i)
         binsZ[i] = -900 + i * 1800 / nBinsZ;
+
+    for (int i = 0; i <= nBinsZ_2; ++i)
+        binsZ_2[i] = -900 + i * 1800 / nBinsZ_2;
+
 
     double xMin[4] = {200, 50, 50, 200}; // Histo X min tpc 0-1-2-3 = EE-EW-WE-WW
     double xMax[4] = {370, 220, 220, 370}; // Histo X max tpc 0-1-2-3 = EE-EW-WE-WW
