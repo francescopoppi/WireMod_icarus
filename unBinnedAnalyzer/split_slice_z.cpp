@@ -34,10 +34,12 @@ void splitSliceYZ(const char* input_file,
     TString output_name = TString::Format("slice_z%d.root", z_bin_index);
     TFile* outFile = TFile::Open(output_name, "RECREATE");
 
-    float f_y, f_z, f_integral, f_width;
+    float f_dirX, f_pitch, f_y, f_z, f_integral, f_width;
 
     TTree* t_nominal = new TTree("nominal", "Z slice");
 
+    t_nominal->Branch("dirX",     &f_dirX,     "dirX/F");
+    t_nominal->Branch("pitch",    &f_pitch,   "pitch/F");
     t_nominal->Branch("y",        &f_y,        "y/F");
     t_nominal->Branch("z",        &f_z,        "z/F");
     t_nominal->Branch("integral", &f_integral, "integral/F");
@@ -58,7 +60,8 @@ void splitSliceYZ(const char* input_file,
 
     for (Long64_t i = 0; i < nentries; i++) {
         tree->GetEntry(i);
-
+        f_dirX     = dirX;
+        f_pitch    = pitch;
         f_y        = y;
         f_z        = z;
         f_integral = integral;
