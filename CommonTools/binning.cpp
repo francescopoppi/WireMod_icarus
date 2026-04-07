@@ -37,10 +37,10 @@ void initBins() {
         binsPitch[i] = 0.0 + i * (5.0 - 0.0) / nBinsPitch;
     
     for (int i = 0; i <= nBinsY; ++i)
-        binsY[i] = -180 + i * (180+120) / nBinsY;
+        binsY[i] = -180 + i * (180+130) / nBinsY;
 
     for (int i = 0; i <= nBinsY_2; ++i)
-        binsY[i] = -180 + i * (180+120) / nBinsY_2;
+        binsY[i] = -180 + i * (180+130) / nBinsY_2;
 
     for (int i = 0; i <= nBinsZ; ++i)
         binsZ[i] = -900 + i * 1800 / nBinsZ;
