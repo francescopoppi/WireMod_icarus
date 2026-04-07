@@ -85,7 +85,7 @@ def compute_3x3_subbins(values, theta_vals, x_vals, theta_min, theta_max, x_min,
 
 def process_z_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_index=0,
                          z_min=-150, z_max=150):
-    y_edges = np.linspace(-180, 120, 15+1)   # 31 bin Y
+    y_edges = np.linspace(-180, 130, 15+1)   # 31 bin Y
     n_y_bins = len(y_edges) - 1
 
     z_edges = np.array([z_min, z_max])       # slice Z già fissata
