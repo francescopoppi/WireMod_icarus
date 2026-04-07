@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cmath>
 
 TH2D* graphToTH2D_usingTemplate(TGraph2D* g, TH2D* hTemplate) {
     if (!g || !hTemplate) return nullptr;
