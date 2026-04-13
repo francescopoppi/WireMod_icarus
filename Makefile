@@ -22,6 +22,9 @@ SRC_RATIO     := BinnedRatioMaker/processTGraphRatio.cpp \
 SRC_SLICE := unBinnedAnalyzer/split_slice.cpp \
              CommonTools/binning.cpp
 
+SRC_SLICE_COARSE := unBinnedAnalyzer/split_slice_thetaXW_coarse.cpp \
+             CommonTools/binning.cpp
+
 SRC_SLICEYZ := unBinnedAnalyzer/split_slice_z.cpp \
              CommonTools/binning.cpp
 
@@ -37,6 +40,7 @@ TARGET_ANALYZER := ntupleAnalyzer
 TARGET_TH3      := produceTGraphFromTH3
 TARGET_RATIO    := produceRatio
 TARGET_SLICE    := produceSlice
+TARGET_SLICE_COARSE    := produceSlice_coarse
 TARGET_SLICEYZ  := produceSliceYZ
 TARGET_SLICEYZ_4:= produceSliceYZ_rebin4
 
@@ -56,6 +60,9 @@ $(TARGET_RATIO): $(SRC_RATIO)
 
 $(TARGET_SLICE): $(SRC_SLICE)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_SLICE) -o $(TARGET_SLICE) $(ROOTLIBS)
+    
+$(TARGET_SLICE_COARSE): $(SRC_SLICE_COARSE)
+	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_SLICE_COARSE) -o $(TARGET_SLICE_COARSE) $(ROOTLIBS)
 
 $(TARGET_SLICEYZ): $(SRC_SLICEYZ)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_SLICEYZ) -o $(TARGET_SLICEYZ) $(ROOTLIBS)
@@ -68,4 +75,4 @@ $(TARGET_BINEDGE): $(SRC_BINEDGE)
 	$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) $(SRC_BINEDGE) -o $(TARGET_BINEDGE) $(ROOTLIBS)
 
 clean:
-	rm -f $(TARGET_ANALYZER) $(TARGET_TH3) $(TARGET_RATIO) $(TARGET_SLICE) $(TARGET_SLICEYZ) $(TARGET_SLICEYZ_4) $(TARGET_BINEDGE) *.o
+	rm -f $(TARGET_ANALYZER) $(TARGET_TH3) $(TARGET_RATIO) $(TARGET_SLICE) $(TARGET_SLICE_COARSE) $(TARGET_SLICEYZ) $(TARGET_SLICEYZ_4) $(TARGET_BINEDGE) *.o

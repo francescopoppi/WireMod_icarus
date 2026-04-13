@@ -1,13 +1,15 @@
 #include "binning.h"
 
 double thetaBinsXW[nThetaBinsXW+1];
+double thetaBinsXW_coarse[nThetaBinsXW_coarse+1];
 double binsWidth[nBinsWidth+1];
 double binsGoodness[nBinsGoodness+1];
 double binsDQDX[nBinsDQDX+1];
 double binsMult[nBinsMult+1];
 double binsIntegral[nBinsIntegral+1];
 double binsPitch[nBinsPitch+1];
-double binsX[4][nBinsX+1]; 
+double binsX[4][nBinsX+1];
+double binsX_coarse[4][nBinsX_coarse+1];
 double binsY[nBinsY+1];
 double binsZ[nBinsZ+1];
 double binsY_2[nBinsY_2+1];
@@ -17,6 +19,9 @@ double binsZ_2[nBinsZ_2+1];
 void initBins() {
     for (int i = 0; i <= nThetaBinsXW; i++)
         thetaBinsXW[i] = 0.0 + i * (90.0 / nThetaBinsXW);
+
+    for (int i = 0; i <= nThetaBinsXW_coarse; i++)
+        thetaBinsXW_coarse[i] = 0.0 + i * (90.0 / nThetaBinsXW_coarse);
 
     for (int i = 0; i <= nBinsWidth; ++i)
         binsWidth[i] = 1.0 + i * (30.0 - 0.0) / nBinsWidth;
@@ -56,6 +61,12 @@ void initBins() {
         for (int i = 0; i <= nBinsX; i++)
             binsX[tpc][i] = xMin[tpc] + i * (xMax[tpc] - xMin[tpc]) / nBinsX;
     }
+
+    for (int tpc = 0; tpc < 4; tpc++) {
+        for (int i = 0; i <= nBinsX_coarse; i++)
+            binsX_coarse[tpc][i] = xMin[tpc] + i * (xMax[tpc] - xMin[tpc]) / nBinsX_coarse;
+    }
+
 }
 
 void getAnalysisEdges_XTheta(int tpc, std::vector<double>& xedges,
@@ -120,5 +131,32 @@ void getAnalysisEdges_XThetaUnBinned(int tpc,
     xedges.push_back(allXedges[iEnd-2]);
 
     double thetaArr[] = {0,4,8,12,16,20,24,28,32,36,40,44,48,54,65,90};
+    thetaEdges.assign(thetaArr, thetaArr + sizeof(thetaArr)/sizeof(double));
+}
+
+void getAnalysisEdges_XThetaCoarseUnBinned(int tpc,
+                                    std::vector<double>& xedges,
+                                    std::vector<double>& thetaEdges)
+{
+    xedges.clear();
+    thetaEdges.clear();
+
+    std::vector<double> allXedges;
+    for (int i = 0; i <= nBinsX_coarse; ++i)
+        allXedges.push_back(binsX_coarse[tpc][i]);
+
+    int iStart = 0;
+    int iEnd   = allXedges.size();
+
+    // Remove first and last bins, merge first two and last two
+    xedges.push_back(allXedges[iStart+1]);
+    xedges.push_back(allXedges[iStart+3]);
+
+    for (int i = iStart+4; i <= iEnd-3; ++i)
+        xedges.push_back(allXedges[i]);
+
+    xedges.push_back(allXedges[iEnd-1]);
+
+    double thetaArr[] = {0,6,12,18,24,30,38,46,56,90};
     thetaEdges.assign(thetaArr, thetaArr + sizeof(thetaArr)/sizeof(double));
 }

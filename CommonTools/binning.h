@@ -11,14 +11,22 @@ const int nBinsMult       = 5;
 const int nBinsIntegral   = 200;  
 const int nBinsPitch      = 100;  
 const int nBinsX = 40;
+const int nBinsX_coarse = 20;
+
 const int nBinsY = 31;
 const int nBinsZ = 180;
 const int nBinsY_2 = 15;
 const int nBinsZ_2 = 45;
-const int nThetaBinsXW = 45; 
+const int nThetaBinsXW = 45;
+const int nThetaBinsXW_coarse = 45;
+
 
 extern double binsX[4][nBinsX+1]; // tpc 0-1-2-3 = EE-EW-WE-WW
+extern double binsX_coarse[4][nBinsX_coarse+1]; // tpc 0-1-2-3 = EE-EW-WE-WW
+
 extern double thetaBinsXW[nThetaBinsXW+1];
+extern double thetaBinsXW_coarse[nThetaBinsXW_coarse+1];
+
 extern double binsWidth[nBinsWidth+1];
 extern double binsGoodness[nBinsGoodness+1];
 extern double binsDQDX[nBinsDQDX+1];
@@ -38,6 +46,10 @@ void getAnalysisEdges_XTheta(int tpc, std::vector<double>& xedges,
                            const TH3D* h3_orig);
 
 void getAnalysisEdges_XThetaUnBinned(int tpc,
+                                    std::vector<double>& xedges,
+                                    std::vector<double>& thetaEdges);
+
+void getAnalysisEdges_XThetaCoarseUnBinned(int tpc,
                                     std::vector<double>& xedges,
                                     std::vector<double>& thetaEdges);
 

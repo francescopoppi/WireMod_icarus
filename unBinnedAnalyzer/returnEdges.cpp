@@ -10,7 +10,7 @@
 int main(int argc, char* argv[]) {
     if (argc != 5) {
         std::cerr << "Usage: " << argv[0]
-                  << " <X|Z|Z2> <tpc> <bin_index> <min|max>\n";
+                  << " <X|X2|Z|Z2> <tpc> <bin_index> <min|max>\n";
         return 1;
     }
 
@@ -26,6 +26,27 @@ int main(int argc, char* argv[]) {
         std::vector<double> thetaEdges;
 
         getAnalysisEdges_XThetaUnBinned(tpc, xedges, thetaEdges);
+
+        if (bin_index < 0 || bin_index >= static_cast<int>(xedges.size()) - 1) {
+            std::cerr << "Error: X bin_index out of range (0-" << xedges.size()-2 << ")\n";
+            return 1;
+        }
+
+        if (opt == "min")
+            std::cout << xedges[bin_index] << "\n";
+        else if (opt == "max")
+            std::cout << xedges[bin_index + 1] << "\n";
+        else {
+            std::cerr << "Error: option must be 'min' or 'max'\n";
+            return 1;
+        }
+    }
+
+    else if (mode == "X2") {
+        std::vector<double> xedges;
+        std::vector<double> thetaEdges;
+
+        getAnalysisEdges_XThetaCoarseUnBinned(tpc, xedges, thetaEdges);
 
         if (bin_index < 0 || bin_index >= static_cast<int>(xedges.size()) - 1) {
             std::cerr << "Error: X bin_index out of range (0-" << xedges.size()-2 << ")\n";
