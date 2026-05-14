@@ -150,15 +150,15 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
         mean_i, err_i = iterative_truncated_mean(b["integral"])
         mean_w, err_w = iterative_truncated_mean(b["width"])
 
-        sub_i = compute_3x3_subbins(
-            b["integral"], np.array(b["theta"]), np.array(b["x"]),
-            theta_min, theta_max, x_min_bin, x_max_bin
-        )
-
-        sub_w = compute_3x3_subbins(
-            b["width"], np.array(b["theta"]), np.array(b["x"]),
-            theta_min, theta_max, x_min_bin, x_max_bin
-        )
+        #sub_i = compute_3x3_subbins(
+        #    b["integral"], np.array(b["theta"]), np.array(b["x"]),
+        #    theta_min, theta_max, x_min_bin, x_max_bin
+        #)
+#
+        #sub_w = compute_3x3_subbins(
+        #    b["width"], np.array(b["theta"]), np.array(b["x"]),
+        #    theta_min, theta_max, x_min_bin, x_max_bin
+        #)
 
         row = {
             "theta_bin": pd.Interval(theta_min, theta_max),
@@ -170,11 +170,11 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
             "err_width": err_w,
         }
 
-        for k in range(1, 10):
-            row[f"sub{k}_mean_integral"] = sub_i[k][0]
-            row[f"sub{k}_err_integral"]  = sub_i[k][1]
-            row[f"sub{k}_mean_width"]    = sub_w[k][0]
-            row[f"sub{k}_err_width"]     = sub_w[k][1]
+        #for k in range(1, 10):
+        #    row[f"sub{k}_mean_integral"] = sub_i[k][0]
+        #    row[f"sub{k}_err_integral"]  = sub_i[k][1]
+        #    row[f"sub{k}_mean_width"]    = sub_w[k][0]
+        #    row[f"sub{k}_err_width"]     = sub_w[k][1]
 
         results.append(row)
 
