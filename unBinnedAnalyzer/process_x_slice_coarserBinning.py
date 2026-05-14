@@ -135,10 +135,10 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
 
             for t, x, i, w, th, xx in zip(tb[valid], xb[valid], integral[valid], width[valid], thetaX[valid], x[valid]):
                 b = bins[(t, x)]
-                b["integral"].append(i)
-                b["width"].append(w)
-                b["theta"].append(th)
-                b["x"].append(xx)
+                b["integral"].append(float(i))
+                b["width"].append(float(w))
+                b["theta"].append(float(th))
+                b["x"].append(float(xx))
 
     results = []
     for (t_idx, x_idx), b in tqdm(bins.items(), desc="Computing ITM per (theta,X) bin"):
