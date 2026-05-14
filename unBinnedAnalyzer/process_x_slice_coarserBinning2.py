@@ -185,7 +185,7 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
 
     return df
 
-process_x_slice_slim2(
+process_x_slice_slim(
     slice_file=args.input,
     save_to=args.output,
     chunk_size_mb=args.chunk_size,
