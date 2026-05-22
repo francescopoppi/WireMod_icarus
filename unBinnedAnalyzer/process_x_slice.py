@@ -84,6 +84,142 @@ def compute_3x3_subbins(values, theta_vals, x_vals, theta_min, theta_max, x_min,
 
     return results
 
+
+def save_theta_histograms_root(
+    bins_pre,
+    bins_post,
+    theta_edges,
+    output_root="theta_histograms.root"
+):
+    """
+    Salva histogrammi ROOT compatibili via uproot.
+
+    Per ogni bin di theta salva:
+      - integral pre-cut
+      - integral post-cut
+      - width pre-cut
+      - width post-cut
+    """
+
+    histograms = {}
+
+    n_theta_bins = len(theta_edges) - 1
+
+    for t_idx in range(n_theta_bins):
+
+        theta_min = theta_edges[t_idx]
+        theta_max = theta_edges[t_idx + 1]
+
+        bpre = bins_pre[(t_idx, 0)]
+
+        integral_pre = np.array(bpre["integral"], dtype=np.float64)
+        width_pre    = np.array(bpre["width"], dtype=np.float64)
+
+
+
+        if len(integral_pre) > 0:
+
+            #xmin = np.percentile(integral_pre, 0.5)
+            xmin = 0.
+            xmax = np.percentile(integral_pre, 99.5)
+
+            if xmin == xmax:
+                xmax += 1.
+
+            counts, edges = np.histogram(
+                integral_pre,
+                bins=400,
+                range=(xmin, xmax)
+            )
+
+            histograms[
+                f"hIntegral_pre_theta{t_idx}"
+            ] = (counts, edges)
+
+        # -------------------------
+        # width pre
+        # -------------------------
+
+        if len(width_pre) > 0:
+
+            #xmin = np.percentile(integral_pre, 0.5)
+            xmin = 0.
+            xmax = np.percentile(width_pre, 99.5)
+
+            if xmin == xmax:
+                xmax += 1.
+
+            counts, edges = np.histogram(
+                width_pre,
+                bins=200,
+                range=(xmin, xmax)
+            )
+
+            histograms[
+                f"hWidth_pre_theta{t_idx}"
+            ] = (counts, edges)
+
+        # =========================================================
+        # POST CUT
+        # =========================================================
+
+        bpost = bins_post[(t_idx, 0)]
+
+        integral_post = np.array(bpost["integral"], dtype=np.float64)
+        width_post    = np.array(bpost["width"], dtype=np.float64)
+
+        # -------------------------
+        # integral post
+        # -------------------------
+
+        if len(integral_post) > 0:
+
+            #xmin = np.percentile(integral_pre, 0.5)
+            xmin = 0.
+            xmax = np.percentile(integral_post, 99.5)
+
+            if xmin == xmax:
+                xmax += 1.
+
+            counts, edges = np.histogram(
+                integral_post,
+                bins=400,
+                range=(xmin, xmax)
+            )
+
+            histograms[
+                f"hIntegral_post_theta{t_idx}"
+            ] = (counts, edges)
+
+        # -------------------------
+        # width post
+        # -------------------------
+
+        if len(width_post) > 0:
+
+            #xmin = np.percentile(integral_pre, 0.5)
+            xmin = 0.
+            xmax = np.percentile(width_post, 99.5)
+
+            if xmin == xmax:
+                xmax += 1.
+
+            counts, edges = np.histogram(
+                width_post,
+                bins=200,
+                range=(xmin, xmax)
+            )
+
+            histograms[
+                f"hWidth_post_theta{t_idx}"
+            ] = (counts, edges)
+
+    with uproot.recreate(output_root) as fout:
+        for name, hist in histograms.items():
+            fout[name] = hist
+
+    print(f"Saved histograms to {output_root}")
+
 def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_index=0, x_min=-150, x_max=150, x_nbins=15):
     theta_edges = theta_edges_bin
     theta_centers = 0.25 * (theta_edges[1:] - theta_edges[:-1])
@@ -92,9 +228,19 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
     x_edges = np.array([x_min, x_max])
     n_x_bins = 1
 
+    bins_pre = {}
     bins = {}
+    
     for t_idx in range(n_theta_bins):
         for x_idx in range(n_x_bins):
+        
+            bins_pre[(t_idx, x_idx)] = {
+                "integral": [],
+                "width": [],
+                "theta": [],
+                "x": []
+            }
+    
             bins[(t_idx, x_idx)] = {
                 "integral": [],
                 "width": [],
@@ -116,25 +262,68 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
             integral = chunk["integral"]
             width    = chunk["width"]
 
+            # =========================================================
+            # PRE CUT
+            # =========================================================
+
+            tb_pre = np.digitize(thetaX, theta_edges) - 1
+            xb_pre = np.digitize(x, x_edges) - 1
+
+            valid_pre = (
+                (tb_pre >= 0) & (tb_pre < n_theta_bins) &
+                (xb_pre >= 0) & (xb_pre < n_x_bins)
+            )
+
+            for t, xb, i, w, th, xx in zip(
+                tb_pre[valid_pre],
+                xb_pre[valid_pre],
+                integral[valid_pre],
+                width[valid_pre],
+                thetaX[valid_pre],
+                x[valid_pre]
+            ):
+                b = bins_pre[(t, xb)]
+
+                b["integral"].append(i)
+                b["width"].append(w)
+                b["theta"].append(th)
+                b["x"].append(xx)
+
+            # =========================================================
+            # APPLY CUTS
+            # =========================================================
+
             mask_integral = integral > cut_integral(thetaX)
             mask_width = width > cut_width(thetaX, plane_index)
             mask = mask_integral & mask_width
 
-            thetaX = thetaX[mask]
-            x   = x[mask]
-            integral = integral[mask]
-            width = width[mask]
+            thetaX_post = thetaX[mask]
+            x_post      = x[mask]
+            integral_post = integral[mask]
+            width_post    = width[mask]
 
-            tb = np.digitize(thetaX, theta_edges) - 1
-            xb = np.digitize(x, x_edges) - 1
+            # =========================================================
+            # POST CUT
+            # =========================================================
 
-            valid = (
-                (tb >= 0) & (tb < n_theta_bins) &
-                (xb >= 0) & (xb < n_x_bins)
+            tb_post = np.digitize(thetaX_post, theta_edges) - 1
+            xb_post = np.digitize(x_post, x_edges) - 1
+
+            valid_post = (
+                (tb_post >= 0) & (tb_post < n_theta_bins) &
+                (xb_post >= 0) & (xb_post < n_x_bins)
             )
 
-            for t, x, i, w, th, xx in zip(tb[valid], xb[valid], integral[valid], width[valid], thetaX[valid], x[valid]):
-                b = bins[(t, x)]
+            for t, xb, i, w, th, xx in zip(
+                tb_post[valid_post],
+                xb_post[valid_post],
+                integral_post[valid_post],
+                width_post[valid_post],
+                thetaX_post[valid_post],
+                x_post[valid_post]
+            ):
+                b = bins[(t, xb)]
+
                 b["integral"].append(i)
                 b["width"].append(w)
                 b["theta"].append(th)
@@ -177,7 +366,12 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
             row[f"sub{k}_err_width"]     = sub_w[k][1]
 
         results.append(row)
-
+        save_theta_histograms_root(
+            bins_pre=bins_pre,
+            bins_post=bins,
+            theta_edges=theta_edges,
+            output_root=save_to.replace(".pkl", "_histo.root")
+        )
     df = pd.DataFrame(results)
     if save_to:
         df.to_pickle(save_to)
