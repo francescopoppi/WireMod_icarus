@@ -121,8 +121,8 @@ def save_theta_histograms_root(
 
             #xmin = np.percentile(integral_pre, 0.5)
             xmin = 0.
-            xmax = np.percentile(integral_pre, 99.5)
-
+            #xmax = np.percentile(width_pre, 99.5)
+            xmax = 2000.
             if xmin == xmax:
                 xmax += 1.
 
@@ -145,7 +145,7 @@ def save_theta_histograms_root(
             #xmin = np.percentile(integral_pre, 0.5)
             xmin = 0.
             #xmax = np.percentile(width_pre, 99.5)
-            xmax = 20.
+            xmax = 30.
             
             if xmin == xmax:
                 xmax += 1.
@@ -177,7 +177,8 @@ def save_theta_histograms_root(
 
             #xmin = np.percentile(integral_pre, 0.5)
             xmin = 0.
-            xmax = np.percentile(integral_post, 99.5)
+            #xmax = np.percentile(width_pre, 99.5)
+            xmax = 2000.
 
             if xmin == xmax:
                 xmax += 1.
@@ -201,7 +202,7 @@ def save_theta_histograms_root(
             #xmin = np.percentile(integral_pre, 0.5)
             xmin = 0.
             #xmax = np.percentile(width_pre, 99.5)
-            xmax = 20.
+            xmax = 30.
             
             if xmin == xmax:
                 xmax += 1.
