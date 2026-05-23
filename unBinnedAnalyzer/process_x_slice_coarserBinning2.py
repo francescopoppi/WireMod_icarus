@@ -230,12 +230,17 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
     x_edges = np.array([x_min, x_max])
     n_x_bins = 1
 
+    bins_pre = {}
     bins = {}
     for t_idx in range(n_theta_bins):
         for x_idx in range(n_x_bins):
+            bins_pre[(t_idx, x_idx)] = {
+                "integral": [],
+                "width": []
+            }
             bins[(t_idx, x_idx)] = {
                 "integral": [],
-                "width": [],
+                "width": []
             }
 
     with uproot.open(slice_file) as f:
