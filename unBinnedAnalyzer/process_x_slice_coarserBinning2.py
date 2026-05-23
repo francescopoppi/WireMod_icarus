@@ -84,6 +84,144 @@ def compute_3x3_subbins(values, theta_vals, x_vals, theta_min, theta_max, x_min,
 
     return results
 
+def save_theta_histograms_root(
+    bins_pre,
+    bins_post,
+    theta_edges,
+    output_root="theta_histograms.root"
+):
+    """
+    Salva histogrammi ROOT compatibili via uproot.
+
+    Per ogni bin di theta salva:
+      - integral pre-cut
+      - integral post-cut
+      - width pre-cut
+      - width post-cut
+    """
+
+    histograms = {}
+
+    n_theta_bins = len(theta_edges) - 1
+
+    for t_idx in range(n_theta_bins):
+
+        theta_min = theta_edges[t_idx]
+        theta_max = theta_edges[t_idx + 1]
+
+        bpre = bins_pre[(t_idx, 0)]
+
+        integral_pre = np.array(bpre["integral"], dtype=np.float64)
+        width_pre    = np.array(bpre["width"], dtype=np.float64)
+
+
+
+        if len(integral_pre) > 0:
+
+            #xmin = np.percentile(integral_pre, 0.5)
+            xmin = 0.
+            #xmax = np.percentile(width_pre, 99.5)
+            xmax = 2000.
+            if xmin == xmax:
+                xmax += 1.
+
+            counts, edges = np.histogram(
+                integral_pre,
+                bins=400,
+                range=(xmin, xmax)
+            )
+
+            histograms[
+                f"hIntegral_pre_theta{t_idx}"
+            ] = (counts, edges)
+
+        # -------------------------
+        # width pre
+        # -------------------------
+
+        if len(width_pre) > 0:
+
+            #xmin = np.percentile(integral_pre, 0.5)
+            xmin = 0.
+            #xmax = np.percentile(width_pre, 99.5)
+            xmax = 30.
+            
+            if xmin == xmax:
+                xmax += 1.
+
+            counts, edges = np.histogram(
+                width_pre,
+                bins=300,
+                range=(xmin, xmax)
+            )
+
+            histograms[
+                f"hWidth_pre_theta{t_idx}"
+            ] = (counts, edges)
+
+        # =========================================================
+        # POST CUT
+        # =========================================================
+
+        bpost = bins_post[(t_idx, 0)]
+
+        integral_post = np.array(bpost["integral"], dtype=np.float64)
+        width_post    = np.array(bpost["width"], dtype=np.float64)
+
+        # -------------------------
+        # integral post
+        # -------------------------
+
+        if len(integral_post) > 0:
+
+            #xmin = np.percentile(integral_pre, 0.5)
+            xmin = 0.
+            #xmax = np.percentile(width_pre, 99.5)
+            xmax = 2000.
+
+            if xmin == xmax:
+                xmax += 1.
+
+            counts, edges = np.histogram(
+                integral_post,
+                bins=400,
+                range=(xmin, xmax)
+            )
+
+            histograms[
+                f"hIntegral_post_theta{t_idx}"
+            ] = (counts, edges)
+
+        # -------------------------
+        # width post
+        # -------------------------
+
+        if len(width_post) > 0:
+
+            #xmin = np.percentile(integral_pre, 0.5)
+            xmin = 0.
+            #xmax = np.percentile(width_pre, 99.5)
+            xmax = 30.
+            
+            if xmin == xmax:
+                xmax += 1.
+
+            counts, edges = np.histogram(
+                width_post,
+                bins=300,
+                range=(xmin, xmax)
+            )
+
+            histograms[
+                f"hWidth_post_theta{t_idx}"
+            ] = (counts, edges)
+
+    with uproot.recreate(output_root) as fout:
+        for name, hist in histograms.items():
+            fout[name] = hist
+
+    print(f"Saved histograms to {output_root}")
+
 def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_index=0, x_min=-150, x_max=150, x_nbins=15):
     theta_edges = theta_edges_bin
     theta_centers = 0.25 * (theta_edges[1:] - theta_edges[:-1])
@@ -177,7 +315,12 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
         #    row[f"sub{k}_err_width"]     = sub_w[k][1]
 
         results.append(row)
-
+        save_theta_histograms_root(
+            bins_pre=bins_pre,
+            bins_post=bins,
+            theta_edges=theta_edges,
+            output_root=save_to.replace(".pkl", "_histo.root")
+        )
     df = pd.DataFrame(results)
     if save_to:
         df.to_pickle(save_to)
