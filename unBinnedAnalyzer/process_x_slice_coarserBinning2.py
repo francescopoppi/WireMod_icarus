@@ -336,12 +336,12 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
         #    row[f"sub{k}_err_width"]     = sub_w[k][1]
 
         results.append(row)
-    save_theta_histograms_root(
-            bins_pre=bins_pre,
-            bins_post=bins,
-            theta_edges=theta_edges,
-            output_root=save_to.replace(".pkl", "_histo.root")
-        )
+    #save_theta_histograms_root(
+    #        bins_pre=bins_pre,
+    #        bins_post=bins,
+    #        theta_edges=theta_edges,
+    #        output_root=save_to.replace(".pkl", "_histo.root")
+    #    )
     df = pd.DataFrame(results)
     if save_to:
         df.to_pickle(save_to)
