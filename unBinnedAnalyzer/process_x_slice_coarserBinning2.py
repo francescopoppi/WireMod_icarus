@@ -111,10 +111,17 @@ def save_theta_histograms_root(
 
         bpre = bins_pre[(t_idx, 0)]
 
-        integral_pre = np.array(bpre["integral"], dtype=np.float64)
-        width_pre    = np.array(bpre["width"], dtype=np.float64)
+        integral_pre = (
+            np.concatenate(bpre["integral"]).astype(np.float64)
+            if bpre["integral"]
+            else np.array([], dtype=np.float64)
+        )
 
-
+        width_pre = (
+            np.concatenate(bpre["width"]).astype(np.float64)
+            if bpre["width"]
+            else np.array([], dtype=np.float64)
+        )
 
         if len(integral_pre) > 0:
 
@@ -165,8 +172,17 @@ def save_theta_histograms_root(
 
         bpost = bins_post[(t_idx, 0)]
 
-        integral_post = np.array(bpost["integral"], dtype=np.float64)
-        width_post    = np.array(bpost["width"], dtype=np.float64)
+        integral_post = (
+            np.concatenate(bpost["integral"]).astype(np.float64)
+            if bpost["integral"]
+            else np.array([], dtype=np.float64)
+        )
+
+        width_post = (
+            np.concatenate(bpost["width"]).astype(np.float64)
+            if bpost["width"]
+            else np.array([], dtype=np.float64)
+        )
 
         # -------------------------
         # integral post
@@ -320,7 +336,7 @@ def process_x_slice_slim(slice_file, save_to=None, chunk_size_mb=200, plane_inde
         #    row[f"sub{k}_err_width"]     = sub_w[k][1]
 
         results.append(row)
-        save_theta_histograms_root(
+    save_theta_histograms_root(
             bins_pre=bins_pre,
             bins_post=bins,
             theta_edges=theta_edges,
